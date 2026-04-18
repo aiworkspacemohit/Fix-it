@@ -4,11 +4,14 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import WorkerProfile from './pages/WorkerProfile';
 import Dashboard from './pages/Dashboard';
+import Workers from './pages/Workers';
+import Contact from './pages/Contact';
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
@@ -23,13 +26,15 @@ function App() {
     <AuthProvider>
       <SocketProvider>
         <Router>
-          <div className="min-h-screen bg-gray-50 text-gray-900">
+          <div className="app-layout">
             <Navbar />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="main-content-flow">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/workers" element={<Workers />} />
                 <Route path="/worker/:id" element={<WorkerProfile />} />
                 <Route 
                   path="/dashboard" 
@@ -40,7 +45,8 @@ function App() {
                   } 
                 />
               </Routes>
-            </div>
+            </main>
+            <Footer />
             <Toaster position="top-right" />
           </div>
         </Router>

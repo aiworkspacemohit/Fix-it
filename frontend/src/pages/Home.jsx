@@ -1,177 +1,253 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, MapPin, Star, Sparkles, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Search, MapPin, Star, ArrowRight, Zap, Droplets, Wind, Wrench, Hammer, CheckCircle2, ShieldCheck, Clock, Tag } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+
+const CATEGORIES = [
+  { name: 'Plumbing', icon: <Droplets size={32} />, desc: 'Expert pipe repairs & installations.' },
+  { name: 'Electrical', icon: <Zap size={32} />, desc: 'Safe wiring & power solutions.' },
+  { name: 'AC Repair', icon: <Wind size={32} />, desc: 'Stay cool with instant cooling fixes.' },
+  { name: 'Carpentry', icon: <Hammer size={32} />, desc: 'Custom furniture & structural woodworking.' }
+];
 
 const Home = () => {
   const [workers, setWorkers] = useState([]);
-  const [search, setSearch] = useState('');
-  const [city, setCity] = useState('New York');
-  const [aiRecs, setAiRecs] = useState(null);
-  const [matching, setMatching] = useState(false);
-  const { user } = useAuth();
-
-  const fetchWorkers = async () => {
-    try {
-      const { data } = await axios.get(`http://localhost:5000/api/workers?category=${search}&city=${city}`);
-      setWorkers(data);
-    } catch (err) {
-      toast.error('Failed to fetch workers');
-    }
-  };
-
+  
   useEffect(() => {
+    const fetchWorkers = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:5000/api/workers`);
+        setWorkers(data);
+      } catch (err) {
+        toast.error('Failed to fetch workers');
+      }
+    };
     fetchWorkers();
-  }, [city]);
-
-  const handleAiMatch = async () => {
-    if (!user) {
-      toast.error('Please login to use AI matching');
-      return;
-    }
-    if (!search) {
-      toast.error('Please describe your problem in the search bar');
-      return;
-    }
-
-    setMatching(true);
-    try {
-      const { data } = await axios.post('http://localhost:5000/api/ai/match', {
-        problem: search,
-        userLocation: user.city || city,
-        workers: workers
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setAiRecs(data);
-      toast.success('AI Matching Complete!');
-    } catch (err) {
-      toast.error('AI Matching failed');
-    } finally {
-      setMatching(false);
-    }
-  };
+  }, []);
 
   return (
-    <div className="space-y-12">
-      {/* Hero Section */}
-      <section className="text-center py-16 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-          <Sparkles className="h-64 w-64 text-primary" />
-        </div>
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
-          Reliable Repairs, <br /><span className="text-primary">Right at Your Doorstep.</span>
-        </h1>
-        <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-          Find and book verified local experts for any home repair task in minutes.
-        </p>
-
-        {/* Search Bar */}
-        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row gap-4 px-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-4 h-6 w-6 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="What do you need fixed? (e.g. leaking pipe, AC repair)"
-              className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-primary outline-none text-lg"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="relative sm:w-48">
-            <MapPin className="absolute left-4 top-4 h-6 w-6 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="City"
-              className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-primary outline-none text-lg"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
-          </div>
-          <button onClick={fetchWorkers} className="btn-primary py-4 px-8 rounded-2xl text-lg flex items-center justify-center">
-            Search
-          </button>
-        </div>
-
-        <div className="mt-8 flex justify-center">
-          <button 
-            onClick={handleAiMatch}
-            disabled={matching}
-            className="flex items-center space-x-2 text-primary font-bold hover:bg-orange-50 px-6 py-2 rounded-full transition"
-          >
-            <Sparkles className={matching ? 'animate-spin' : ''} />
-            <span>{matching ? 'Matching with AI...' : 'Try AI Expert Matchmaker'}</span>
-          </button>
-        </div>
-      </section>
-
-      {/* AI Recommendations */}
-      {aiRecs && (
-        <section className="bg-orange-50 border border-orange-200 rounded-3xl p-8">
-          <div className="flex items-center space-x-2 mb-6">
-            <Sparkles className="text-primary h-6 w-6" />
-            <h2 className="text-2xl font-bold">Top AI Recommendations</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {aiRecs.map((rec) => (
-              <div key={rec.workerId} className="bg-white p-6 rounded-2xl border border-orange-100 shadow-sm">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-bold">{rec.name}</h3>
-                  <span className="bg-orange-100 text-primary text-xs font-bold px-2 py-1 rounded-full">{rec.score}% Match</span>
-                </div>
-                <p className="text-gray-600 text-sm mb-4 italic">"{rec.reason}"</p>
-                <Link to={`/worker/${rec.workerId}`} className="text-primary font-bold hover:underline">View Profile →</Link>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Workers Grid */}
-      <section>
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold">Available Experts</h2>
-          <button className="flex items-center space-x-2 text-gray-600 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm hover:bg-gray-50">
-            <SlidersHorizontal className="h-5 w-5" />
-            <span>Filters</span>
-          </button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {workers.map((worker) => (
-            <div key={worker._id} className="card-repair">
-              <div className="h-48 bg-gray-200 relative">
-                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId.name}`} alt={worker.userId.name} className="w-full h-full object-cover" />
-                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-2 py-1 rounded-lg flex items-center space-x-1 shadow-sm">
-                   <Star className="h-4 w-4 text-primary fill-current" />
-                   <span className="text-sm font-bold">{worker.rating.toFixed(1)}</span>
-                 </div>
-              </div>
-              <div className="p-5">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary mb-1 block">{worker.category}</span>
-                <h3 className="text-xl font-bold mb-2">{worker.userId.name}</h3>
-                <div className="flex items-center text-gray-500 text-sm mb-4">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {worker.userId.location.city}
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                  <div>
-                    <span className="text-2xl font-bold text-gray-900">${worker.hourlyRate}</span>
-                    <span className="text-gray-500 text-sm">/hr</span>
-                  </div>
-                  <Link to={`/worker/${worker.userId._id}`} className="btn-primary py-2 px-4 rounded-xl">Book</Link>
-                </div>
-              </div>
+    <div className="home-wrapper">
+      
+      {/* 2. HERO SECTION */}
+      <section className="food-hero section">
+         <div className="container hero-grid">
+            <div className="hero-left fade-in-up">
+               <h1 className="hero-heading">Reliable Home Services for a <span className="text-accent">Better Life</span></h1>
+               <p className="hero-subtext text-muted">Book verified experts for cleaning, plumbing, electrical, and more. Transparent pricing, instant booking.</p>
+               <div className="hero-cta">
+                  <Link to="/services" className="btn-primary">Explore Services <ArrowRight size={18} /></Link>
+               </div>
             </div>
-          ))}
-        </div>
-        {workers.length === 0 && (
-          <div className="text-center py-20 text-gray-500">
-            No workers found for this category/city. Try searching for something else.
-          </div>
-        )}
+            
+            <div className="hero-right">
+               <div className="hero-image-wrapper">
+                  <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=800" alt="Home Services Professionals" className="main-hero-img" />
+                  
+                  {/* Floating Elements */}
+                  <div className="float-card float-1 card-light">
+                     <Clock className="text-accent" />
+                     <div><strong>Fast Service</strong><span>Under 2 hours</span></div>
+                  </div>
+                  <div className="float-card float-2 card-light">
+                     <ShieldCheck className="text-secondary" />
+                     <div><strong>Trusted Experts</strong><span>Background Verified</span></div>
+                  </div>
+                  <div className="float-card float-3 card-light">
+                     <Tag className="text-accent" />
+                     <div><strong>Affordable</strong><span>Best Pricing</span></div>
+                  </div>
+               </div>
+            </div>
+         </div>
       </section>
+
+      {/* 3. FEATURED SERVICES CAROUSEL */}
+      <section className="section bg-white">
+         <div className="container">
+            <h2 className="section-title">Popular Sub-Services</h2>
+            <div className="carousel-wrapper">
+               {['Deep Cleaning', 'Furnace Repair', 'Sofa Cleaning', 'Pipe Installation', 'Wall Painting'].map((srv, idx) => (
+                  <div className="carousel-card card-light" key={idx}>
+                     <img src={`https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80`} alt={srv} />
+                     <div className="caro-content">
+                        <h3>{srv}</h3>
+                        <p className="text-muted">From $45/hr</p>
+                        <Link to="/services" className="btn-secondary" style={{padding: '8px 16px', fontSize:'0.9rem', width:'100%', marginTop:'10px'}}>Book Now</Link>
+                     </div>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* 4. OUR CATEGORIES */}
+      <section className="section">
+         <div className="container">
+            <h2 className="section-title text-center">Our Core Categories</h2>
+            <div className="grid grid-4">
+               {CATEGORIES.map(cat => (
+                  <div className="category-card card" key={cat.name}>
+                     <div className="cat-icon text-accent">{cat.icon}</div>
+                     <h3>{cat.name}</h3>
+                     <p className="text-muted">{cat.desc}</p>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* 5. GET STARTED TODAY */}
+      <section className="section bg-white get-started-section">
+         <div className="container split-layout">
+            <div className="split-left">
+               <h2 className="section-title">Get Started Today in 3 Easy Steps</h2>
+               <p className="text-muted mb-4">We've revolutionized home services so you can get back to living. Our intelligent backend guarantees matching accuracy.</p>
+               
+               <ul className="feature-list">
+                  <li><CheckCircle2 color="var(--secondary-accent)" size={24} /> <strong>AI Matching:</strong> Our algorithm instantly connects you to the optimal professional.</li>
+                  <li><CheckCircle2 color="var(--secondary-accent)" size={24} /> <strong>Real-time Chat:</strong> Discuss custom issues via our secure platform.</li>
+                  <li><CheckCircle2 color="var(--secondary-accent)" size={24} /> <strong>Easy Booking:</strong> Select your timeframe and pay securely.</li>
+               </ul>
+            </div>
+            <div className="split-right">
+               <img src="https://images.unsplash.com/photo-1544717685-618765275e7a?auto=format&fit=crop&q=80&w=600" className="rounded-img" alt="Chat UI Display" />
+            </div>
+         </div>
+      </section>
+
+      {/* 6. TOP WORKERS SECTION */}
+      <section className="section">
+         <div className="container">
+            <h2 className="section-title">Top Rated Professionals</h2>
+            <div className="grid grid-3">
+               {workers.slice(0, 3).map(worker => (
+                  <div className="worker-card card" key={worker._id}>
+                     <div className="w-header">
+                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`} alt="Avatar" className="w-avatar" />
+                        <div>
+                           <h3>{worker.userId?.name}</h3>
+                           <p className="text-muted">{worker.category} Specialist</p>
+                        </div>
+                     </div>
+                     <div className="w-stats">
+                        <div className="rating"><Star size={16} fill="var(--primary-accent)" color="var(--primary-accent)" /> 4.9 (120 reviews)</div>
+                        <div className="price">${worker.hourlyRate}/hour</div>
+                     </div>
+                     <Link to={`/worker/${worker.userId?._id}`} className="btn-primary" style={{width:'100%'}}>Book Provider</Link>
+                  </div>
+               ))}
+               
+               {workers.length === 0 && <p className="text-muted">Loading network professionals...</p>}
+            </div>
+         </div>
+      </section>
+
+      {/* 7. MEET OUR TEAM */}
+      <section className="section bg-white team-section">
+         <div className="container text-center">
+            <h2 className="section-title">Meet the Leadership</h2>
+            <div className="grid grid-3 team-grid">
+               {[
+                  {n: 'Sarah Jenkins', r: 'Head of Operations', i: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200'},
+                  {n: 'David Smith', r: 'CTO / Backend Architect', i: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200'},
+                  {n: 'Elena Rodriguez', r: 'Provider Relations', i: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200'}
+               ].map(t => (
+                  <div className="team-card card" key={t.n}>
+                     <img src={t.i} alt={t.n} className="t-img" />
+                     <h3>{t.n}</h3>
+                     <p className="text-muted">{t.r}</p>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* 8. PROMO SECTION */}
+      <section className="container mb-big">
+         <div className="promo-banner card">
+            <div className="promo-content">
+               <h2>Ready to transform your home?</h2>
+               <p>Get <strong>20% Discount</strong> on Your First Service!</p>
+            </div>
+            <Link to="/register" className="btn-primary promo-btn">Claim Offer Now</Link>
+         </div>
+      </section>
+
+      <style jsx>{`
+        .bg-white { background: var(--card-bg); }
+        .text-center { text-align: center; }
+        .mb-4 { margin-bottom: 24px; }
+        .mb-big { margin-bottom: 100px; }
+        
+        .section-title { font-size: 2.2rem; margin-bottom: 40px; color: var(--text-primary); letter-spacing:-0.5px;}
+
+        /* Hero */
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .hero-heading { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; color: var(--text-primary); }
+        .hero-subtext { font-size: 1.2rem; margin-bottom: 40px; max-width: 500px; }
+        
+        .hero-image-wrapper { position: relative; }
+        .main-hero-img { width: 100%; border-radius: 40px; box-shadow: var(--shadow-main); object-fit: cover; height: 500px; }
+        
+        .float-card { position: absolute; padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-radius: 99px; white-space: nowrap; z-index: 2; width: max-content; }
+        .float-card div { display: flex; flex-direction: column; }
+        .float-card strong { font-size: 0.9rem; color: var(--text-primary); }
+        .float-card span { font-size: 0.75rem; color: var(--text-secondary); }
+        
+        .float-1 { top: 40px; right: -40px; }
+        .float-2 { bottom: 60px; left: -40px; }
+        .float-3 { bottom: -20px; right: 20px; }
+
+        /* Carousel */
+        .carousel-wrapper { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 24px; scroll-snap-type: x mandatory; }
+        .carousel-wrapper::-webkit-scrollbar { height: 8px; }
+        .carousel-wrapper::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
+        .carousel-card { min-width: 280px; scroll-snap-align: start; padding: 0; overflow: hidden; }
+        .carousel-card img { width: 100%; height: 180px; object-fit: cover; }
+        .caro-content { padding: 20px; }
+        .caro-content h3 { font-size: 1.1rem; margin-bottom: 4px; }
+        
+        /* Categories */
+        .category-card { text-align: center; display: flex; flex-direction: column; align-items: center; padding: 40px 24px; }
+        .cat-icon { width: 80px; height: 80px; background: rgba(255,122,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .category-card h3 { margin-bottom: 10px; }
+
+        /* Get Started */
+        .split-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .feature-list { list-style: none; display: flex; flex-direction: column; gap: 20px; }
+        .feature-list li { display: flex; align-items: flex-start; gap: 16px; font-size: 1.05rem; }
+        .feature-list p { margin-top: 4px; }
+        .rounded-img { width: 100%; border-radius: 20px; box-shadow: var(--shadow-main); }
+
+        /* Worker Cards */
+        .worker-card { display: flex; flex-direction: column; gap: 20px; }
+        .w-header { display: flex; align-items: center; gap: 16px; }
+        .w-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: #EEE; }
+        .w-stats { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-light); font-weight: 600; }
+        .rating { display: flex; align-items: center; gap: 6px; }
+        .price { color: var(--primary-accent); }
+
+        /* Team */
+        .team-grid { justify-content: center; }
+        .team-card { display: flex; flex-direction: column; align-items: center; }
+        .t-img { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; object-fit: cover; }
+
+        /* Promo */
+        .promo-banner { background: var(--secondary-accent); color: white; display: flex; justify-content: space-between; align-items: center; padding: 48px; border-radius: 24px; }
+        .promo-content h2 { color: white; font-size: 2.2rem; margin-bottom: 8px; }
+        .promo-content p { font-size: 1.2rem; }
+        .promo-btn { background: white; color: var(--secondary-accent); padding: 18px 40px; font-size: 1.1rem; border-radius: var(--radius-pill); cursor: pointer; text-decoration: none; font-weight: 800; }
+        .promo-btn:hover { background: #F9FAFB; transform: scale(1.05); }
+
+        @media (max-width: 1024px) {
+           .hero-grid, .split-layout { grid-template-columns: 1fr; }
+           .hero-left { text-align: center; }
+           .hero-cta { display: flex; justify-content: center; }
+           .float-card { display: none; }
+           .promo-banner { flex-direction: column; text-align: center; gap: 24px; padding: 32px; }
+        }
+      `}</style>
     </div>
   );
 };

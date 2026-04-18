@@ -3,17 +3,16 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import Chat from '../components/Chat';
-import { CheckCircle, XCircle, Clock, Star, MessageSquare, AlertCircle, Tag, DollarSign, Briefcase } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Star, MessageSquare, AlertCircle, Calendar, User as UserIcon } from 'lucide-react';
 
 const CATEGORIES = [
-  'Plumbing', 'Electrician', 'AC Repair', 'Carpenter',
+  'Plumbing', 'Electrical', 'AC Repair', 'Carpenter',
   'Painter', 'Cleaning', 'Appliance Repair', 'Pest Control',
   'Masonry', 'General Handyman'
 ];
 
-// Worker profile setup form for existing workers without a profile
 const WorkerSetupBanner = ({ onComplete }) => {
-  const [form, setForm] = useState({ category: 'Plumbing', skills: '', hourlyRate: '', bio: '' });
+  const [form, setForm] = useState({ category: 'Plumbing', skills: '', hourlyRate: '30', bio: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -34,67 +33,51 @@ const WorkerSetupBanner = ({ onComplete }) => {
   };
 
   return (
-    <div className="bg-orange-50 border-2 border-dashed border-primary rounded-3xl p-8 mb-8">
-      <div className="flex items-start gap-4 mb-6">
-        <AlertCircle className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Complete Your Worker Profile</h2>
-          <p className="text-gray-600 mt-1">You registered as a worker but don't have a profile yet. Fill in your details to start appearing in search results and receiving bookings.</p>
-        </div>
+    <div className="card dashboard-professional-banner">
+      <div className="banner-visual-ui">
+        <AlertCircle size={40} color="var(--primary-accent)" />
       </div>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
-          <div className="relative">
-            <Tag className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <select
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white"
-              value={form.category}
-              onChange={e => setForm({ ...form, category: e.target.value })}
-            >
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+      <div className="banner-content-ui">
+        <h2>Expert Profile Incomplete</h2>
+        <p className="text-muted">You registered as a professional but haven't set up your public profile yet. Fill in the details to start receiving job requests.</p>
+        
+        <form onSubmit={handleSubmit} className="setup-grid-ui">
+          <div className="field-row-ui">
+            <div className="field-group-ui">
+              <label>Service Category</label>
+              <select className="input-field" onChange={e => setForm({...form, category: e.target.value})}>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="field-group-ui">
+              <label>Hourly Rate ($)</label>
+              <input type="number" className="input-field" placeholder="45" onChange={e => setForm({...form, hourlyRate: e.target.value})} />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Hourly Rate ($)</label>
-          <div className="relative">
-            <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <input
-              type="number" min="1" required
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none"
-              placeholder="e.g. 50"
-              onChange={e => setForm({ ...form, hourlyRate: e.target.value })}
-            />
+          <div className="field-group-ui">
+            <label>Professional Bio</label>
+            <textarea className="input-field text-area-compact" placeholder="Describe your experience..." onChange={e => setForm({...form, bio: e.target.value})}></textarea>
           </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Skills (comma separated)</label>
-          <div className="relative">
-            <Briefcase className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none"
-              placeholder="Pipe fitting, Leak repair..."
-              onChange={e => setForm({ ...form, skills: e.target.value })}
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-          <input
-            type="text"
-            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none"
-            placeholder="Briefly describe your experience..."
-            onChange={e => setForm({ ...form, bio: e.target.value })}
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <button type="submit" disabled={submitting} className="btn-primary py-3 px-8 rounded-xl font-bold disabled:opacity-60">
-            {submitting ? 'Saving...' : 'Save Profile & Go Live 🚀'}
+          <button type="submit" disabled={submitting} className="btn-primary" style={{marginTop: '10px'}}>
+            {submitting ? 'Activating...' : 'Activate Professional Profile'}
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
+      <style jsx>{`
+        .dashboard-professional-banner { 
+          display: flex; gap: 40px; border: 2px dashed rgba(255, 122, 0, 0.5); margin-bottom: 48px; padding: 48px; background: rgba(255, 122, 0, 0.05); box-shadow: none;
+        }
+        .banner-content-ui h2 { font-size: 1.8rem; margin-bottom: 12px; color: var(--text-primary); }
+        .banner-content-ui p { margin-bottom: 32px; max-width: 600px; }
+        .setup-grid-ui { display: flex; flex-direction: column; gap: 24px; }
+        .field-row-ui { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .field-group-ui label { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; display: block; color: var(--text-primary); }
+        .text-area-compact { min-height: 80px; resize: none; }
+        @media (max-width: 768px) {
+          .dashboard-professional-banner { flex-direction: column; padding: 24px; gap: 24px; }
+          .field-row-ui { grid-template-columns: 1fr; }
+        }
+      `}</style>
     </div>
   );
 };
@@ -111,7 +94,6 @@ const Dashboard = () => {
 
   const authHeader = { Authorization: `Bearer ${localStorage.getItem('token')}` };
 
-  // For workers: check if they have a profile
   useEffect(() => {
     if (user?.role === 'worker') {
       axios.get(`http://localhost:5000/api/workers/${user.id}`)
@@ -163,173 +145,200 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':   return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'accepted':  return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'completed': return 'bg-green-100 text-green-700 border-green-200';
-      case 'cancelled': return 'bg-red-100 text-red-700 border-red-200';
-      default:          return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  if (!profileChecked) {
-    return <div className="text-center py-20 text-gray-400">Loading dashboard...</div>;
-  }
+  if (!profileChecked) return <div className="loading-ui">Loading Profile...</div>;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Bookings List */}
-      <div className="lg:col-span-2 space-y-6">
-        <h1 className="text-3xl font-bold mb-2">
-          {user?.role === 'worker' ? 'Incoming Jobs' : 'My Bookings'}
-        </h1>
-
-        {/* Show profile setup banner for workers without a profile */}
-        {user?.role === 'worker' && !hasProfile && (
-          <WorkerSetupBanner onComplete={() => { setHasProfile(true); fetchBookings(); }} />
-        )}
-
-        {bookings.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 rounded-3xl text-gray-400 font-medium border border-dashed border-gray-200">
-            {user?.role === 'worker'
-              ? 'No job requests yet. Make sure your profile is complete and visible.'
-              : 'No bookings yet. Browse workers on the home page and book one!'}
+    <div className="container dashboard-professional-wrap section">
+      
+      <div className="card user-profile-banner">
+        <div className="profile-info">
+          <div className="profile-avatar">
+            <UserIcon size={40} color="var(--primary-accent)" />
           </div>
-        ) : (
-          bookings.map(booking => {
-            // Null-safe access to populated fields
-            const workerName = booking.workerId?.name ?? 'Unknown Worker';
-            const customerName = booking.customerId?.name ?? 'Unknown Customer';
-            const displayName = user?.role === 'worker' ? customerName : workerName;
-            const receiverId = user?.role === 'worker'
-              ? booking.customerId?._id
-              : booking.workerId?._id;
+          <div className="profile-text">
+            <h2>{user?.name}</h2>
+            <p className="text-muted">{user?.email}</p>
+            <span className="profile-role-badge">{user?.role === 'worker' ? 'Professional Partner' : 'Customer Account'}</span>
+          </div>
+        </div>
+      </div>
 
-            return (
-              <div key={booking._id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(booking.status)} uppercase`}>
-                      {booking.status}
-                    </span>
-                    <span className="text-gray-400 text-sm flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {booking.date ? new Date(booking.date).toLocaleDateString() : '—'}
-                      {booking.timeSlot ? ` at ${booking.timeSlot}` : ''}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold">{displayName}</h3>
-                  <p className="text-gray-600 text-sm max-w-md">"{booking.problemDescription}"</p>
-                </div>
+      <div className="dashboard-grid-ui">
+        <div className="dashboard-main-area">
+          <header className="dash-header-ui">
+            <h1>{user?.role === 'worker' ? 'Job Management' : 'Booking History'}</h1>
+            <p className="text-muted">Manage your active jobs, communications, and upcoming service requests.</p>
+          </header>
 
-                <div className="flex flex-wrap items-center gap-2 h-fit md:self-center">
-                  {user?.role === 'worker' && booking.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => updateStatus(booking._id, 'accepted')}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-xl transition"
-                        title="Accept"
-                      >
-                        <CheckCircle />
-                      </button>
-                      <button
-                        onClick={() => updateStatus(booking._id, 'cancelled')}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition"
-                        title="Reject"
-                      >
-                        <XCircle />
-                      </button>
-                    </>
-                  )}
-                  {user?.role === 'worker' && booking.status === 'accepted' && (
-                    <button
-                      onClick={() => updateStatus(booking._id, 'completed')}
-                      className="btn-primary py-2 px-4 rounded-xl text-sm"
-                    >
-                      Mark Done
-                    </button>
-                  )}
-                  {user?.role === 'customer' && booking.status === 'pending' && (
-                    <button
-                      onClick={() => updateStatus(booking._id, 'cancelled')}
-                      className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                  {user?.role === 'customer' && booking.status === 'completed' && (
-                    <button
-                      onClick={() => setShowRateModal(booking)}
-                      className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center space-x-1"
-                    >
-                      <Star className="h-4 w-4 fill-current" />
-                      <span>Rate</span>
-                    </button>
-                  )}
-                  {receiverId && (
-                    <button
-                      onClick={() => setActiveChat({ id: booking._id, receiver: receiverId })}
-                      className="p-2 text-primary hover:bg-orange-50 rounded-xl transition"
-                      title="Chat"
-                    >
-                      <MessageSquare />
-                    </button>
-                  )}
-                </div>
+          {user?.role === 'worker' && !hasProfile && (
+            <WorkerSetupBanner onComplete={() => { setHasProfile(true); fetchBookings(); }} />
+          )}
+
+          <div className="bookings-scroll-area">
+            {bookings.length === 0 ? (
+              <div className="card empty-dash-card">
+                <Calendar size={48} color="var(--border-light)" />
+                <h3 className="mt-4">No Active Requests</h3>
+                <p className="text-muted">When you have service requests, they will appear here for management.</p>
               </div>
-            );
-          })
-        )}
+            ) : (
+              bookings.map(booking => {
+                const workerName = booking.workerId?.name ?? 'Unknown Provider';
+                const customerName = booking.customerId?.name ?? 'Unknown Client';
+                const displayName = user?.role === 'worker' ? customerName : workerName;
+                const receiverId = user?.role === 'worker' ? booking.customerId?._id : booking.workerId?._id;
+
+                return (
+                  <div key={booking._id} className="card booking-entry-ui">
+                    <div className="entry-status">
+                      <span className={`badge-ui status-${booking.status}`}>{booking.status}</span>
+                      <span className="entry-time"><Clock size={14} /> {new Date(booking.date).toLocaleDateString()} at {booking.timeSlot}</span>
+                    </div>
+                    <div className="entry-details">
+                      <h3>{displayName}</h3>
+                      <p className="text-muted">"{booking.problemDescription}"</p>
+                    </div>
+                    <div className="entry-actions">
+                      <div className="status-flow-btns">
+                        {user?.role === 'worker' && booking.status === 'pending' && (
+                          <>
+                            <button onClick={() => updateStatus(booking._id, 'accepted')} className="action-btn success"><CheckCircle size={18} /></button>
+                            <button onClick={() => updateStatus(booking._id, 'cancelled')} className="action-btn danger"><XCircle size={18} /></button>
+                          </>
+                        )}
+                        {user?.role === 'worker' && booking.status === 'accepted' && (
+                          <button onClick={() => updateStatus(booking._id, 'completed')} className="btn-primary" style={{padding: '10px 20px', fontSize: '0.9rem'}}>Mark Done</button>
+                        )}
+                        {user?.role === 'customer' && booking.status === 'pending' && (
+                          <button onClick={() => updateStatus(booking._id, 'cancelled')} className="btn-secondary" style={{padding: '10px 20px', fontSize: '0.9rem'}}>Cancel</button>
+                        )}
+                        {user?.role === 'customer' && booking.status === 'completed' && (
+                          <button onClick={() => setShowRateModal(booking)} className="btn-rate-ui"><Star size={16} /> Rate</button>
+                        )}
+                      </div>
+                      <div className="action-divider"></div>
+                      <button onClick={() => setActiveChat({ id: booking._id, receiver: receiverId })} className={`msg-trigger ${activeChat?.id === booking._id ? 'active' : ''}`}>
+                        <MessageSquare size={20} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        <aside className="dashboard-sidebar-ui">
+          {activeChat ? (
+            <div className="chat-sticky-wrap">
+              <Chat bookingId={activeChat.id} receiverId={activeChat.receiver} />
+            </div>
+          ) : (
+            <div className="card chat-helper-card">
+              <MessageSquare size={40} color="var(--border-light)" style={{marginBottom: '16px'}} />
+              <h3>Direct Liaison</h3>
+              <p className="text-muted">Select any service request to initiate a real-time secure communication thread.</p>
+            </div>
+          )}
+        </aside>
       </div>
 
-      {/* Chat Sidebar */}
-      <div className="lg:col-span-1">
-        {activeChat ? (
-          <div className="sticky top-24">
-            <Chat bookingId={activeChat.id} receiverId={activeChat.receiver} />
-          </div>
-        ) : (
-          <div className="bg-white p-8 rounded-3xl border border-dashed border-gray-300 flex flex-col items-center text-center text-gray-400 sticky top-24">
-            <MessageSquare className="h-12 w-12 mb-4 opacity-20" />
-            <p>Click the chat icon on any booking to start a conversation.</p>
-          </div>
-        )}
-      </div>
-
-      {/* Rating Modal */}
       {showRateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl">
-            <h2 className="text-2xl font-bold mb-6">
-              Rate {showRateModal.workerId?.name ?? 'Worker'}
-            </h2>
-            <form onSubmit={handleRate} className="space-y-6">
-              <div className="flex justify-center space-x-2">
-                {[1, 2, 3, 4, 5].map(star => (
-                  <button key={star} type="button" onClick={() => setRating(star)}>
-                    <Star className={`h-10 w-10 ${rating >= star ? 'text-primary fill-current' : 'text-gray-200'}`} />
-                  </button>
+        <div className="modal-overlay">
+          <div className="card modal-content-ui">
+            <h2>Experience Rating</h2>
+            <form onSubmit={handleRate} className="rating-form-ui">
+              <div className="stars-ui">
+                {[1, 2, 3, 4, 5].map(s => (
+                  <button key={s} type="button" onClick={() => setRating(s)}><Star size={36} className={rating >= s ? 'active' : ''} /></button>
                 ))}
               </div>
-              <textarea
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Leave a comment about the service..."
-                rows="4"
-                onChange={e => setComment(e.target.value)}
-              />
-              <div className="flex gap-4">
-                <button type="button" onClick={() => setShowRateModal(null)} className="flex-1 py-3 font-bold text-gray-500">
-                  Cancel
-                </button>
-                <button type="submit" className="flex-1 btn-primary py-3 rounded-2xl">
-                  Submit Rating
-                </button>
+              <textarea className="input-field" style={{minHeight: '100px'}} placeholder="How was the professional service?" onChange={e => setComment(e.target.value)} />
+              <div className="modal-actions-ui">
+                 <button type="button" onClick={() => setShowRateModal(null)} className="btn-text">Cancel</button>
+                 <button type="submit" className="btn-primary">Post Review</button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .dashboard-professional-wrap { padding-top: 60px; }
+        
+        .user-profile-banner {
+           margin-bottom: 48px;
+        }
+        .profile-info {
+           display: flex;
+           align-items: center;
+           gap: 24px;
+        }
+        .profile-avatar {
+           width: 80px; height: 80px; background: rgba(255, 122, 0, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+        .profile-role-badge {
+           display: inline-block; background: var(--secondary-accent); color: white; padding: 6px 14px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; margin-top: 8px;
+        }
+        
+        .dashboard-grid-ui { display: grid; grid-template-columns: 1fr 420px; gap: 48px; }
+        .dash-header-ui { margin-bottom: 48px; }
+        .dash-header-ui h1 { font-size: 2.8rem; margin-bottom: 8px; color: var(--text-primary); }
+        
+        .bookings-scroll-area { display: flex; flex-direction: column; gap: 24px; }
+        .booking-entry-ui { display: flex; align-items: center; justify-content: space-between; padding: 24px 32px; border: 1px solid var(--border-light); box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .booking-entry-ui:hover { border-color: var(--primary-accent); }
+
+        .entry-status { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+        
+        .badge-ui { padding: 6px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .status-pending { background: #FFF3CD; color: #856404; border: 1px solid #FFEEBA; }
+        .status-accepted { background: #D1ECF1; color: #0C5460; border: 1px solid #BEE5EB; }
+        .status-completed { background: #D4EDDA; color: #155724; border: 1px solid #C3E6CB; }
+        .status-cancelled { background: #F8D7DA; color: #721C24; border: 1px solid #F5C6CB; }
+        
+        .entry-time { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; }
+        
+        .entry-details h3 { font-size: 1.2rem; margin-bottom: 4px; color: var(--text-primary); }
+        .entry-details p { font-size: 0.95rem; max-width: 400px; }
+        
+        .entry-actions { display: flex; align-items: center; gap: 20px; }
+        .status-flow-btns { display: flex; gap: 10px; }
+        .action-btn { width: 44px; height: 44px; border-radius: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .action-btn.success { background: #D4EDDA; color: #155724; }
+        .action-btn.danger { background: #F8D7DA; color: #721C24; }
+        .btn-rate-ui { background: var(--border-light); color: var(--text-primary); border: none; padding: 10px 20px; border-radius: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;}
+        .btn-rate-ui:hover { background: #D1D5DB; }
+        
+        .action-divider { width: 1px; height: 32px; background: var(--border-light); }
+        .msg-trigger { background: var(--input-bg); color: var(--text-primary); border: none; width: 48px; height: 48px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border: 1px solid var(--border-light); }
+        .msg-trigger:hover, .msg-trigger.active { background: rgba(255, 122, 0, 0.1); color: var(--primary-accent); border-color: var(--primary-accent); }
+        
+        .chat-helper-card { text-align: center; padding: 60px 40px; border: 1px dashed var(--border-light); background: var(--input-bg); box-shadow: none; }
+        .chat-sticky-wrap { position: sticky; top: 100px; }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 3000; }
+        .modal-content-ui { width: 100%; max-width: 480px; padding: 48px; text-align: center; }
+        .stars-ui { display: flex; justify-content: center; gap: 12px; margin: 32px 0; }
+        .stars-ui button { background: none; border: none; cursor: pointer; color: var(--border-light); transition: color 0.2s; }
+        .stars-ui .active { color: #F59E0B; fill: #F59E0B; }
+        .modal-actions-ui { display: flex; gap: 16px; margin-top: 32px; }
+        .btn-text { flex: 1; background: none; border: none; font-weight: 700; color: var(--text-secondary); cursor: pointer; transition: color 0.2s; }
+        .btn-text:hover { color: var(--text-primary); }
+        
+        .loading-ui { text-align: center; padding: 150px; font-size: 1.2rem; font-weight: 700; color: var(--primary-accent); }
+        .empty-dash-card { text-align: center; padding: 100px; border: 1px dashed var(--border-light); box-shadow: none; background: var(--input-bg); }
+        
+        .mt-4 { margin-top: 16px; }
+
+        @media (max-width: 1024px) {
+          .dashboard-grid-ui { grid-template-columns: 1fr; }
+          .booking-entry-ui { flex-direction: column; align-items: flex-start; gap: 20px; }
+          .entry-actions { width: 100%; justify-content: flex-end; }
+          .chat-sticky-wrap { position: relative; top: 0; }
+          .profile-info { flex-direction: column; text-align: center; }
+        }
+      `}</style>
     </div>
   );
 };
