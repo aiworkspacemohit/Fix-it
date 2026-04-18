@@ -143,25 +143,7 @@ const Home = () => {
          </div>
       </section>
 
-      {/* 7. MEET OUR TEAM */}
-      <section className="section bg-white team-section">
-         <div className="container text-center">
-            <h2 className="section-title">Meet the Leadership</h2>
-            <div className="grid grid-3 team-grid">
-               {[
-                  {n: 'Sarah Jenkins', r: 'Head of Operations', i: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200'},
-                  {n: 'David Smith', r: 'CTO / Backend Architect', i: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200'},
-                  {n: 'Elena Rodriguez', r: 'Provider Relations', i: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200'}
-               ].map(t => (
-                  <div className="team-card card" key={t.n}>
-                     <img src={t.i} alt={t.n} className="t-img" />
-                     <h3>{t.n}</h3>
-                     <p className="text-muted">{t.r}</p>
-                  </div>
-               ))}
-            </div>
-         </div>
-      </section>
+
 
       {/* 8. PROMO SECTION */}
       <section className="container mb-big">

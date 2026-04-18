@@ -12,6 +12,8 @@ import WorkerProfile from './pages/WorkerProfile';
 import Dashboard from './pages/Dashboard';
 import Workers from './pages/Workers';
 import Contact from './pages/Contact';
+import Services from './pages/Services';
+import About from './pages/About';
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
@@ -31,6 +33,8 @@ function App() {
             <main className="main-content-flow">
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/contact" element={<Contact />} />
