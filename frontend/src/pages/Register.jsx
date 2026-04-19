@@ -28,14 +28,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
-      Object.keys(form).forEach(key => {
-        formData.append(key, form[key]);
-      });
-
-      const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, form);
       login(data);
       toast.success('Registration successful!');
       navigate('/');

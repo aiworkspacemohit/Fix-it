@@ -33,10 +33,9 @@ const generateToken = (id, role) => {
 };
 
 // @route POST /api/auth/register
-router.post('/register', upload.single('profileImage'), async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role, city, address, category, skills, hourlyRate, bio } = req.body;
-    const profileImage = req.file ? req.file.path : '';
 
     // Check if user exists
     const userExists = await User.findOne({ email });
@@ -71,8 +70,7 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
         hourlyRate: parseFloat(hourlyRate) || 30,
         rating: 0,
         totalJobs: 0,
-        isVerified: false,
-        profileImage: profileImage
+        isVerified: false
       });
     }
 

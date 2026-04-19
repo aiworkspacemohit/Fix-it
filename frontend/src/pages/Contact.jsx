@@ -13,6 +13,7 @@ const Contact = () => {
 
   // ---- Formspree: replace YOUR_FORM_ID with your actual Formspree endpoint ID ----
   const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT;
+  const FEEDBACK_ENDPOINT = import.meta.env.VITE_FEEDBACK_ENDPOINT;
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -49,16 +50,24 @@ const Contact = () => {
     }
     setFeedbackState('loading');
     try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/feedback`, {
-          message: `[${feedbackForm.category}] ${feedbackForm.comments}`,
-          rating: feedbackForm.rating,
-        }, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(FEEDBACK_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          ...feedbackForm,
+          user_email: user?.email || 'Guest',
+          user_name: user?.name || 'Anonymous'
+        }),
+      });
+
+      if (res.ok) {
+        setFeedbackState('success');
+        toast.success('Thank you for your valuable feedback!');
+        setFeedbackForm({ rating: 5, category: 'General', comments: '' });
+      } else {
+        setFeedbackState('error');
+        toast.error('Failed to submit feedback. Please try again.');
       }
-      setFeedbackState('success');
-      toast.success('Thank you for your valuable feedback!');
-      setFeedbackForm({ rating: 5, category: 'General', comments: '' });
     } catch (err) {
       setFeedbackState('error');
       toast.error('Failed to submit feedback. Please try again.');
