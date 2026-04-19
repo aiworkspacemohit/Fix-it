@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 import toast from 'react-hot-toast';
 import { Star, MapPin, Calendar, Clock, MessageSquare, ShieldCheck, CheckCircle2, ChevronLeft, Award, Heart } from 'lucide-react';
 
 const WorkerProfile = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const socket = useSocket();
   const navigate = useNavigate();
   const [worker, setWorker] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -43,6 +45,7 @@ const WorkerProfile = () => {
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
+      socket?.emit('booking_updated');
       toast.success('Booking requested successfully!');
       setShowBooking(false);
       navigate('/dashboard');
@@ -72,7 +75,11 @@ const WorkerProfile = () => {
              
              <div className="expert-top-row">
                 <div className="expert-avatar-wrap">
-                  <img src={worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId.name}`} alt={worker.userId.name} />
+                  <img 
+                 src={worker.profileImage?.startsWith('http') ? worker.profileImage : (worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`)} 
+                 alt="Avatar" 
+                 className="profile-avatar-ui" 
+              />
                 </div>
                 <div className="expert-essential-info">
                    <h1 className="expert-name-ui">{worker.userId.name}</h1>

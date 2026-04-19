@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 import toast from 'react-hot-toast';
 import Chat from '../components/Chat';
 import { CheckCircle, XCircle, Clock, Star, MessageSquare, AlertCircle, Calendar, User as UserIcon } from 'lucide-react';
@@ -83,10 +84,13 @@ const WorkerSetupBanner = ({ onComplete }) => {
 };
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const socket = useSocket();
   const [bookings, setBookings] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [showRateModal, setShowRateModal] = useState(null);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editForm, setEditForm] = useState({ name: user?.name || '', email: user?.email || '', bio: '', hourlyRate: '' });
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [hasProfile, setHasProfile] = useState(true);
@@ -118,10 +122,20 @@ const Dashboard = () => {
     if (profileChecked) fetchBookings();
   }, [profileChecked]);
 
+  useEffect(() => {
+    if (socket) {
+      socket.on('refresh_bookings', () => {
+        fetchBookings();
+      });
+    }
+    return () => socket?.off('refresh_bookings');
+  }, [socket]);
+
   const updateStatus = async (id, status) => {
     try {
       await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/bookings/${id}/status`, { status }, { headers: authHeader });
       toast.success(`Booking ${status}`);
+      socket?.emit('booking_updated');
       fetchBookings();
     } catch (err) {
       toast.error('Status update failed');
@@ -145,6 +159,29 @@ const Dashboard = () => {
     }
   };
 
+  const handleEditProfile = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, editForm, { headers: authHeader });
+      toast.success("Profile fully updated!");
+      setTimeout(() => window.location.reload(), 800);
+    } catch (err) {
+      toast.error("Failed to update profile");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you sure you want to permanently delete your account? All history and data will be lost!")) {
+      try {
+        await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, { headers: authHeader });
+        toast.success("Account securely deleted");
+        logout();
+      } catch (err) {
+        toast.error("Failed to delete account");
+      }
+    }
+  };
+
   if (!profileChecked) return <div className="loading-ui">Loading Profile...</div>;
 
   return (
@@ -159,6 +196,10 @@ const Dashboard = () => {
             <h2>{user?.name}</h2>
             <p className="text-muted">{user?.email}</p>
             <span className="profile-role-badge">{user?.role === 'worker' ? 'Professional Partner' : 'Customer Account'}</span>
+          </div>
+          <div style={{marginLeft: 'auto', display: 'flex', gap: '12px'}}>
+            <button onClick={() => setShowEditProfile(true)} className="btn-secondary" style={{padding: '10px 20px', borderRadius: '99px'}}>Edit Profile</button>
+            <button onClick={handleDeleteAccount} className="btn-danger-ui">Delete Account</button>
           </div>
         </div>
       </div>
@@ -185,9 +226,21 @@ const Dashboard = () => {
               bookings.map(booking => {
                 const workerName = booking.workerId?.name ?? 'Unknown Provider';
                 const customerName = booking.customerId?.name ?? 'Unknown Client';
-                const isMyRequest = booking.customerId?._id === user?.id;
+                const isMyRequest = booking.customerId?._id === user?.id; // If I sent the request
                 const displayName = isMyRequest ? workerName : customerName;
                 const receiverId = isMyRequest ? booking.workerId?._id : booking.customerId?._id;
+                
+                // Safely extract deeply nested profile attributes
+                const expertCategory = booking.workerProfileObj?.category || 'Professional';
+                const expertRate = booking.workerProfileObj?.hourlyRate || '--';
+                const baseAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`;
+                
+                let renderImage = baseAvatar;
+                if (isMyRequest && booking.workerProfileObj?.profileImage) {
+                   renderImage = booking.workerProfileObj.profileImage.startsWith('http') 
+                      ? booking.workerProfileObj.profileImage 
+                      : `${import.meta.env.VITE_BACKEND_URL}${booking.workerProfileObj.profileImage}`;
+                }
 
                 return (
                   <div key={booking._id} className="card booking-entry-ui">
@@ -195,9 +248,15 @@ const Dashboard = () => {
                       <span className={`badge-ui status-${booking.status}`}>{booking.status}</span>
                       <span className="entry-time"><Clock size={14} /> {new Date(booking.date).toLocaleDateString()} at {booking.timeSlot}</span>
                     </div>
-                    <div className="entry-details">
-                      <h3>{displayName}</h3>
-                      <p className="text-muted">"{booking.problemDescription}"</p>
+                    <div className="entry-details" style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+                      <img src={renderImage} alt="Avatar" style={{width: '60px', height: '60px', borderRadius: '50%', background: '#F5F5F5', objectFit: 'cover'}}/>
+                      <div>
+                         <h3 style={{display: 'flex', alignItems: 'center', gap: '8px'}}>{displayName} {isMyRequest && <span style={{fontSize: '0.8rem', background: 'var(--deep-green)', color: 'white', padding: '2px 8px', borderRadius: '4px'}}>{expertCategory}</span>}</h3>
+                         <p className="text-muted" style={{marginBottom: '6px', fontSize: '0.95rem'}}>"{booking.problemDescription}" {isMyRequest && <span style={{fontWeight: 700}}>• ${expertRate}/hr</span>}</p>
+                         {isMyRequest && booking.workerId?._id && (
+                           <a href={`/worker/${booking.workerId._id}`} style={{fontSize: '0.85rem', color: 'var(--primary-accent)', fontWeight: 600, textDecoration: 'none'}}>View Full Profile & Reviews</a>
+                         )}
+                      </div>
                     </div>
                     <div className="entry-actions">
                       <div className="status-flow-btns">
@@ -264,6 +323,40 @@ const Dashboard = () => {
         </div>
       )}
 
+      {showEditProfile && (
+        <div className="modal-overlay">
+          <div className="card modal-content-ui">
+             <h2>Modify Profile Details</h2>
+             <form onSubmit={handleEditProfile} className="setup-grid-ui" style={{textAlign: 'left', marginTop: '24px'}}>
+                <div className="field-group-ui">
+                  <label>Full Name</label>
+                  <input className="input-field" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} required/>
+                </div>
+                <div className="field-group-ui">
+                  <label>Email Address</label>
+                  <input className="input-field" type="email" value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} required/>
+                </div>
+                {user?.role === 'worker' && (
+                  <div className="field-row-ui">
+                    <div className="field-group-ui">
+                      <label>Hourly Rate ($)</label>
+                      <input className="input-field" type="number" value={editForm.hourlyRate} onChange={e => setEditForm({...editForm, hourlyRate: e.target.value})} />
+                    </div>
+                    <div className="field-group-ui">
+                      <label>Bio Snippet</label>
+                      <input className="input-field" type="text" value={editForm.bio} onChange={e => setEditForm({...editForm, bio: e.target.value})} />
+                    </div>
+                  </div>
+                )}
+                <div className="modal-actions-ui">
+                   <button type="button" onClick={() => setShowEditProfile(false)} className="btn-text">Cancel</button>
+                   <button type="submit" className="btn-primary">Save Details</button>
+                </div>
+             </form>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .dashboard-professional-wrap { padding-top: 60px; }
         
@@ -310,6 +403,8 @@ const Dashboard = () => {
         .action-btn.danger { background: #F8D7DA; color: #721C24; }
         .btn-rate-ui { background: var(--border-light); color: var(--text-primary); border: none; padding: 10px 20px; border-radius: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;}
         .btn-rate-ui:hover { background: #D1D5DB; }
+        .btn-danger-ui { background: transparent; color: #DC2626; border: 1px solid #DC2626; padding: 10px 20px; border-radius: 99px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-danger-ui:hover { background: #FEF2F2; transform: translateY(-2px); }
         
         .action-divider { width: 1px; height: 32px; background: var(--border-light); }
         .msg-trigger { background: var(--input-bg); color: var(--text-primary); border: none; width: 48px; height: 48px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border: 1px solid var(--border-light); }

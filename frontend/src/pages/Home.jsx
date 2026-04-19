@@ -121,10 +121,15 @@ const Home = () => {
          <div className="container">
             <h2 className="section-title">Top Rated Professionals</h2>
             <div className="grid grid-3">
-               {workers.slice(0, 3).map(worker => (
+                {workers.slice(0, 3).map(worker => {
+                  const displayImg = worker.profileImage?.startsWith('http') 
+                    ? worker.profileImage 
+                    : worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` 
+                    : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`;
+                  return (
                   <div className="worker-card card" key={worker._id}>
                      <div className="w-header">
-                        <img src={worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`} alt="Avatar" className="w-avatar" />
+                        <img src={displayImg} alt="Avatar" className="w-avatar" />
                         <div>
                            <h3>{worker.userId?.name}</h3>
                            <p className="text-muted">{worker.category} Specialist</p>
@@ -136,7 +141,7 @@ const Home = () => {
                      </div>
                      <Link to={`/worker/${worker.userId?._id}`} className="btn-primary" style={{width:'100%'}}>Book Provider</Link>
                   </div>
-               ))}
+                )})}
                
                {workers.length === 0 && <p className="text-muted">Loading network professionals...</p>}
             </div>
@@ -228,6 +233,16 @@ const Home = () => {
            .hero-cta { display: flex; justify-content: center; }
            .float-card { display: none; }
            .promo-banner { flex-direction: column; text-align: center; gap: 24px; padding: 32px; }
+        }
+        @media (max-width: 768px) {
+           .hero-heading { font-size: 2.5rem; }
+           .hero-subtext { font-size: 1rem; margin: 0 auto 24px; }
+           .main-hero-img { height: 300px; border-radius: 20px; }
+           .section-title { font-size: 1.8rem; margin-bottom: 24px; }
+           .category-card { padding: 24px 16px; }
+           .feature-list li { font-size: 0.95rem; }
+           .w-header { flex-direction: column; text-align: center; }
+           .w-stats { flex-direction: column; gap: 12px; align-items: stretch; text-align: center; }
         }
       `}</style>
     </div>

@@ -51,6 +51,10 @@ io.on('connection', (socket) => {
     io.to(data.bookingId).emit('receive_message', data);
   });
 
+  socket.on('booking_updated', () => {
+    io.emit('refresh_bookings');
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });

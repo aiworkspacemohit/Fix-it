@@ -58,10 +58,15 @@ const Workers = () => {
              <div className="loading-state text-center text-muted" style={{padding: '100px'}}>Loading professionals...</div>
           ) : filteredWorkers.length > 0 ? (
              <div className="grid grid-3">
-               {filteredWorkers.map(worker => (
+               {filteredWorkers.map(worker => {
+                 const displayImg = worker.profileImage?.startsWith('http') 
+                    ? worker.profileImage 
+                    : worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` 
+                    : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`;
+                 return (
                   <div className="worker-card card" key={worker._id}>
                      <div className="w-header">
-                        <img src={worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`} alt="Avatar" className="w-avatar" />
+                        <img src={displayImg} alt="Avatar" className="w-avatar" />
                         <div>
                            <h3>{worker.userId?.name}</h3>
                            <p className="text-muted" style={{fontWeight: 600}}>{worker.category} Specialist</p>
@@ -80,7 +85,7 @@ const Workers = () => {
                      </div>
                      <Link to={`/worker/${worker.userId?._id}`} className="btn-primary mt-4" style={{width:'100%', padding: '14px'}}>View Profile & Book</Link>
                   </div>
-               ))}
+               ); })}
              </div>
           ) : (
              <div className="empty-state text-center">

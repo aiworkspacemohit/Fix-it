@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const WorkerProfile = require('../models/WorkerProfile');
 const { protect } = require('../middleware/authMiddleware');
 
 // @route POST /api/bookings
@@ -41,7 +42,15 @@ router.get('/', protect, async (req, res) => {
     const bookings = await Booking.find(query)
       .populate('customerId', 'name email location')
       .populate('workerId', 'name email')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+      
+    // Dynamically attach the worker's full professional profile to the dashboard
+    for (const b of bookings) {
+      if (b.workerId) {
+         b.workerProfileObj = await WorkerProfile.findOne({ userId: b.workerId._id }).lean();
+      }
+    }
       
     res.json(bookings);
   } catch (error) {
