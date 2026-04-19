@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Search, Star, Filter, MapPin } from 'lucide-react';
@@ -7,7 +7,9 @@ import toast from 'react-hot-toast';
 const Workers = () => {
   const [workers, setWorkers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     const fetchWorkers = async () => {
@@ -23,10 +25,21 @@ const Workers = () => {
     fetchWorkers();
   }, []);
 
-  const filteredWorkers = workers.filter(worker => 
-    worker.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    worker.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Debounce search input — only re-filter 300ms after user stops typing
+  const handleSearchChange = useCallback((e) => {
+    const val = e.target.value;
+    setSearchTerm(val);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(val), 300);
+  }, []);
+
+  // Memoized filtered list — only recomputes when workers or debouncedSearch changes
+  const filteredWorkers = useMemo(() =>
+    workers.filter(worker =>
+      worker.userId?.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      worker.category?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    ),
+  [workers, debouncedSearch]);
 
   return (
     <div className="workers-page section">
@@ -46,7 +59,7 @@ const Workers = () => {
                className="input-field search-input" 
                placeholder="Search by name or category (e.g., Plumbing, Electrical)..." 
                value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
+               onChange={handleSearchChange}
              />
              <button className="btn-primary search-btn">Search</button>
           </div>

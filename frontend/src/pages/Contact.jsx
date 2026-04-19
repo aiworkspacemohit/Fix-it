@@ -1,27 +1,68 @@
 import React, { useState } from 'react';
-import { Mail, MessageSquare, Star, Send, Phone, MapPin } from 'lucide-react';
+import { Mail, MessageSquare, Star, Send, Phone, MapPin, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const Contact = () => {
+  const { user } = useAuth();
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [feedbackForm, setFeedbackForm] = useState({ rating: 5, category: 'General', comments: '' });
+  const [contactState, setContactState] = useState('idle'); // idle | loading | success | error
+  const [feedbackState, setFeedbackState] = useState('idle');
 
-  const handleContactSubmit = (e) => {
+  // ---- Formspree: replace YOUR_FORM_ID with your actual Formspree endpoint ID ----
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API call
-    setTimeout(() => {
-      toast.success('Message sent! We will get back to you shortly.');
-      setContactForm({ name: '', email: '', message: '' });
-    }, 800);
+    if (!contactForm.name.trim() || !contactForm.email.trim() || !contactForm.message.trim()) {
+      toast.error('Please fill in all fields.');
+      return;
+    }
+    setContactState('loading');
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(contactForm),
+      });
+      if (res.ok) {
+        setContactState('success');
+        setContactForm({ name: '', email: '', message: '' });
+        toast.success('Message sent! We will get back to you shortly.');
+      } else {
+        setContactState('error');
+        toast.error('Failed to send. Please try again.');
+      }
+    } catch (err) {
+      setContactState('error');
+      toast.error('Network error. Please check your connection.');
+    }
   };
 
-  const handleFeedbackSubmit = (e) => {
+  const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API call
-    setTimeout(() => {
+    if (!feedbackForm.comments.trim()) {
+      toast.error('Please add a comment.');
+      return;
+    }
+    setFeedbackState('loading');
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/feedback`, {
+          message: `[${feedbackForm.category}] ${feedbackForm.comments}`,
+          rating: feedbackForm.rating,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+      }
+      setFeedbackState('success');
       toast.success('Thank you for your valuable feedback!');
       setFeedbackForm({ rating: 5, category: 'General', comments: '' });
-    }, 800);
+    } catch (err) {
+      setFeedbackState('error');
+      toast.error('Failed to submit feedback. Please try again.');
+    }
   };
 
   return (
@@ -67,7 +108,21 @@ const Contact = () => {
                      value={contactForm.message} onChange={e => setContactForm({...contactForm, message: e.target.value})}
                    ></textarea>
                  </div>
-                 <button type="submit" className="btn-primary w-full mt-2"><Send size={18} /> Send Message</button>
+
+                 {contactState === 'success' ? (
+                   <div className="form-state-box success-box">
+                     <CheckCircle size={20} /> Message delivered! We'll respond shortly.
+                   </div>
+                 ) : contactState === 'error' ? (
+                   <div className="form-state-box error-box">
+                     <AlertCircle size={20} /> Something went wrong. Please try again.
+                   </div>
+                 ) : null}
+
+                 <button type="submit" className="btn-primary w-full mt-2" disabled={contactState === 'loading'}>
+                   {contactState === 'loading' ? <Loader size={18} className="spin-icon" /> : <Send size={18} />}
+                   {contactState === 'loading' ? 'Sending...' : 'Send Message'}
+                 </button>
               </form>
            </div>
 
@@ -117,7 +172,13 @@ const Contact = () => {
                    ></textarea>
                  </div>
                  
-                 <button type="submit" className="btn-secondary w-full mt-2"><Star size={18} /> Submit Feedback</button>
+                 <button type="submit" className="btn-secondary w-full mt-2" disabled={feedbackState === 'loading'}>
+                   {feedbackState === 'loading' ? <Loader size={18} className="spin-icon" /> : <Star size={18} />}
+                   {feedbackState === 'loading' ? 'Submitting...' : 'Submit Feedback'}
+                 </button>
+                 {feedbackState === 'success' && (
+                   <div className="form-state-box success-box"><CheckCircle size={20} /> Feedback saved. Thank you!</div>
+                 )}
               </form>
            </div>
 
@@ -218,6 +279,12 @@ const Contact = () => {
            color: #F59E0B; fill: #F59E0B;
         }
         .star-btn:hover { transform: scale(1.1); }
+
+        .form-state-box { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-radius: 14px; font-weight: 600; font-size: 0.95rem; }
+        .success-box { background: #D1FAE5; color: #065F46; }
+        .error-box { background: #FEE2E2; color: #991B1B; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin-icon { animation: spin 1s linear infinite; }
 
         .mt-big { margin-top: 80px; }
         .quick-info-bar {

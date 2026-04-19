@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const helmet = require('helmet');
+const sanitize = require('mongo-sanitize');
 
 dotenv.config();
 
@@ -18,8 +20,26 @@ const io = new Server(server, {
 });
 
 // Middleware
+app.use(helmet({
+  contentSecurityPolicy: false,        // Allow Socket.io connections
+  crossOriginEmbedderPolicy: false,     // Allow cross-origin resources
+}));
 app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
 app.use(express.json());
+
+// Custom sanitization middleware for Express 5 compatibility
+app.use((req, res, next) => {
+  if (req.body) sanitize(req.body);
+  if (req.params) sanitize(req.params);
+  // req.query is a getter in Express 5, so we sanitize each property individually
+  if (req.query) {
+    Object.keys(req.query).forEach(key => {
+      req.query[key] = sanitize(req.query[key]);
+    });
+  }
+  next();
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -27,6 +47,7 @@ const authRoutes = require('./routes/authRoutes');
 const workerRoutes = require('./routes/workerRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 
@@ -34,6 +55,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/workers', workerRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/feedback', feedbackRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/chat', chatRoutes);
 
@@ -42,17 +64,25 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   socket.on('join_booking', (bookingId) => {
-    socket.join(bookingId);
+    socket.join(String(bookingId));  // Ensure string-based room ID
     console.log(`User joined booking room: ${bookingId}`);
   });
 
   socket.on('send_message', (data) => {
-    // data is directly emitted; HTTP Handles DB storage
-    io.to(data.bookingId).emit('receive_message', data);
+    // Broadcast to the booking room — bookingId must be a string for socket rooms
+    io.to(String(data.bookingId)).emit('receive_message', data);
   });
 
   socket.on('booking_updated', () => {
     io.emit('refresh_bookings');
+  });
+
+  socket.on('typing_start', ({ bookingId, senderId }) => {
+    socket.to(bookingId).emit('typing_start', { senderId });
+  });
+
+  socket.on('typing_stop', ({ bookingId, senderId }) => {
+    socket.to(bookingId).emit('typing_stop', { senderId });
   });
 
   socket.on('disconnect', () => {

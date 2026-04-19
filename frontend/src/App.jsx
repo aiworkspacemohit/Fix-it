@@ -1,19 +1,21 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import WorkerProfile from './pages/WorkerProfile';
-import Dashboard from './pages/Dashboard';
-import Workers from './pages/Workers';
-import Contact from './pages/Contact';
-import Services from './pages/Services';
-import About from './pages/About';
+
+// Code-split all pages — only load when navigated to
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const WorkerProfile = lazy(() => import('./pages/WorkerProfile'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Workers = lazy(() => import('./pages/Workers'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Services = lazy(() => import('./pages/Services'));
+const About = lazy(() => import('./pages/About'));
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
@@ -31,24 +33,32 @@ function App() {
           <div className="app-layout">
             <Navbar />
             <main className="main-content-flow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/workers" element={<Workers />} />
-                <Route path="/worker/:id" element={<WorkerProfile />} />
-                <Route 
-                  path="/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-              </Routes>
+              <Suspense fallback={
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'60vh',flexDirection:'column',gap:'16px'}}>
+                  <div style={{width:'48px',height:'48px',border:'4px solid var(--border-light)',borderTop:'4px solid var(--primary-accent)',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}></div>
+                  <p style={{color:'var(--text-secondary)',fontWeight:600}}>Loading...</p>
+                  <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+                </div>
+              }>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/workers" element={<Workers />} />
+                  <Route path="/worker/:id" element={<WorkerProfile />} />
+                  <Route 
+                    path="/dashboard" 
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                </Routes>
+              </Suspense>
             </main>
             <Footer />
             <Toaster position="top-right" />
