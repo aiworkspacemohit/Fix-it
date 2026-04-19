@@ -26,7 +26,7 @@ const Navbar = () => {
         <div className="nav-center-links">
            <Link to="/" className={`nav-link ${isActive('/')}`}>Home</Link>
            <Link to="/services" className={`nav-link ${isActive('/services')}`}>Services</Link>
-           <Link to="/workers" className={`nav-link ${isActive('/workers')}`}>Workers</Link>
+           <Link to="/workers" className={`nav-link ${isActive('/workers')}`}>Experts</Link>
            <Link to="/about" className={`nav-link ${isActive('/about')}`}>About</Link>
            <Link to="/contact" className={`nav-link ${isActive('/contact')}`}>Contact</Link>
         </div>
@@ -60,7 +60,7 @@ const Navbar = () => {
         <div className="mobile-dropdown">
            <Link to="/" onClick={() => setMobileMenu(false)} className="mobile-link">Home</Link>
            <Link to="/services" onClick={() => setMobileMenu(false)} className="mobile-link">Services</Link>
-           <Link to="/workers" onClick={() => setMobileMenu(false)} className="mobile-link">Workers</Link>
+           <Link to="/workers" onClick={() => setMobileMenu(false)} className="mobile-link">Experts</Link>
            <Link to="/about" onClick={() => setMobileMenu(false)} className="mobile-link">About</Link>
            <Link to="/contact" onClick={() => setMobileMenu(false)} className="mobile-link">Contact</Link>
            

@@ -72,7 +72,7 @@ const WorkerProfile = () => {
              
              <div className="expert-top-row">
                 <div className="expert-avatar-wrap">
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId.name}`} alt={worker.userId.name} />
+                  <img src={worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId.name}`} alt={worker.userId.name} />
                 </div>
                 <div className="expert-essential-info">
                    <h1 className="expert-name-ui">{worker.userId.name}</h1>

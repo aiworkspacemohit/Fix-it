@@ -12,7 +12,8 @@ const workerProfileSchema = new mongoose.Schema({
   availableSlots: [{
     date: Date,
     times: [String] // e.g., ['09:00', '10:00', '14:00']
-  }]
+  }],
+  profileImage: { type: String }
 });
 
 module.exports = mongoose.model('WorkerProfile', workerProfileSchema);

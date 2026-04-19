@@ -185,8 +185,9 @@ const Dashboard = () => {
               bookings.map(booking => {
                 const workerName = booking.workerId?.name ?? 'Unknown Provider';
                 const customerName = booking.customerId?.name ?? 'Unknown Client';
-                const displayName = user?.role === 'worker' ? customerName : workerName;
-                const receiverId = user?.role === 'worker' ? booking.customerId?._id : booking.workerId?._id;
+                const isMyRequest = booking.customerId?._id === user?.id;
+                const displayName = isMyRequest ? workerName : customerName;
+                const receiverId = isMyRequest ? booking.workerId?._id : booking.customerId?._id;
 
                 return (
                   <div key={booking._id} className="card booking-entry-ui">
@@ -236,7 +237,7 @@ const Dashboard = () => {
           ) : (
             <div className="card chat-helper-card">
               <MessageSquare size={40} color="var(--border-light)" style={{marginBottom: '16px'}} />
-              <h3>Direct Liaison</h3>
+              <h3>Message Box</h3>
               <p className="text-muted">Select any service request to initiate a real-time secure communication thread.</p>
             </div>
           )}

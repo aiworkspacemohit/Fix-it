@@ -21,7 +21,7 @@ const About = () => {
       <div className="bg-white" style={{padding: '80px 0'}}>
          <div className="container split-layout">
             <div className="split-left">
-               <img src="https://images.unsplash.com/photo-1542039986-79010fd7bd0c?auto=format&fit=crop&q=80&w=800" alt="Professional Worker" className="rounded-img shadow-img" />
+               <img src="/images/about_mission.png" alt="Professional Worker" className="rounded-img shadow-img" />
             </div>
             <div className="split-right">
                <h2 style={{fontSize: '2.2rem', marginBottom: '24px', color: 'var(--text-primary)'}}>Our Mission</h2>

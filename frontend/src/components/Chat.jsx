@@ -29,7 +29,9 @@ const Chat = ({ bookingId, receiverId }) => {
     if (socket) {
       socket.emit('join_booking', bookingId);
       socket.on('receive_message', (msg) => {
-        setMessages((prev) => [...prev, msg]);
+        if (msg.senderId !== user.id) {
+          setMessages((prev) => [...prev, msg]);
+        }
       });
     }
     return () => socket?.off('receive_message');
@@ -70,7 +72,7 @@ const Chat = ({ bookingId, receiverId }) => {
            <User size={20} />
         </div>
         <div className="chat-status-ui">
-           <span className="name">Direct Liaison Thread</span>
+           <span className="name">Message Box Thread</span>
            <span className="status"><div className="online-dot"></div> Active Session</span>
         </div>
       </div>

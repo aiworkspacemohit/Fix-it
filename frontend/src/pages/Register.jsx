@@ -15,7 +15,7 @@ const Register = () => {
   const [role, setRole] = useState('customer');
   const [form, setForm] = useState({ 
     name: '', email: '', password: '', role: 'customer', city: 'New York',
-    phone: '', category: 'Plumbing', experience: '1', hourlyRate: '30', bio: ''
+    phone: '', category: 'Plumbing', experience: '1', hourlyRate: '30', bio: '', profileImage: null
   });
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +28,16 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, form);
+      const formData = new FormData();
+      Object.keys(form).forEach(key => {
+        if (form[key] !== null) {
+          formData.append(key, form[key]);
+        }
+      });
+
+      const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       login(data);
       toast.success('Registration successful!');
       navigate('/');
@@ -146,10 +155,17 @@ const Register = () => {
                 </div>
                 
                 <div className="form-group-ui full-span">
-                   <div className="avatar-upload-placeholder">
+                   <label htmlFor="profileImageUpload" className="avatar-upload-placeholder" style={{cursor: 'pointer', display: 'flex'}}>
                       <ImageIcon size={24} />
-                      <span>Upload Profile Photo / ID</span>
-                   </div>
+                      <span>{form.profileImage ? form.profileImage.name : 'Upload Profile Photo / ID (Required for Professionals)'}</span>
+                   </label>
+                   <input 
+                      type="file" 
+                      id="profileImageUpload" 
+                      style={{display: 'none'}} 
+                      accept="image/*"
+                      onChange={e => setForm({...form, profileImage: e.target.files[0]})} 
+                   />
                 </div>
               </>
             )}

@@ -15,4 +15,22 @@ router.get('/:bookingId', protect, async (req, res) => {
   }
 });
 
+// @route POST /api/chat
+// @desc Save a chat message
+router.post('/', protect, async (req, res) => {
+  try {
+    const { bookingId, senderId, receiverId, message, timestamp } = req.body;
+    const newMessage = await Message.create({
+      bookingId,
+      senderId,
+      receiverId,
+      message,
+      timestamp: timestamp || Date.now()
+    });
+    res.status(201).json(newMessage);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error saving message' });
+  }
+});
+
 module.exports = router;

@@ -4,6 +4,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const WorkerProfile = require('../models/WorkerProfile');
+const multer = require('multer');
+const path = require('path');
+
+// Multer Config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+const upload = multer({ storage });
 
 // Generate JWT
 const generateToken = (id, role) => {
@@ -11,9 +24,10 @@ const generateToken = (id, role) => {
 };
 
 // @route POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', upload.single('profileImage'), async (req, res) => {
   try {
     const { name, email, password, role, city, address, category, skills, hourlyRate, bio } = req.body;
+    const profileImage = req.file ? `/uploads/${req.file.filename}` : '';
 
     // Check if user exists
     const userExists = await User.findOne({ email });
@@ -48,7 +62,8 @@ router.post('/register', async (req, res) => {
         hourlyRate: parseFloat(hourlyRate) || 30,
         rating: 0,
         totalJobs: 0,
-        isVerified: false
+        isVerified: false,
+        profileImage: profileImage
       });
     }
 

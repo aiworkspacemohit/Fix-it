@@ -4,6 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ const io = new Server(server, {
 // Middleware
 app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -44,20 +46,9 @@ io.on('connection', (socket) => {
     console.log(`User joined booking room: ${bookingId}`);
   });
 
-  socket.on('send_message', async (data) => {
-    // data: { bookingId, senderId, receiverId, text }
-    const Message = require('./models/Message');
-    try {
-      const newMessage = await Message.create({
-        bookingId: data.bookingId,
-        senderId: data.senderId,
-        receiverId: data.receiverId,
-        text: data.text
-      });
-      io.to(data.bookingId).emit('receive_message', newMessage);
-    } catch (err) {
-      console.error('Socket message error:', err);
-    }
+  socket.on('send_message', (data) => {
+    // data is directly emitted; HTTP Handles DB storage
+    io.to(data.bookingId).emit('receive_message', data);
   });
 
   socket.on('disconnect', () => {

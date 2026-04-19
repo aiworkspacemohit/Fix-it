@@ -61,7 +61,7 @@ const Workers = () => {
                {filteredWorkers.map(worker => (
                   <div className="worker-card card" key={worker._id}>
                      <div className="w-header">
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`} alt="Avatar" className="w-avatar" />
+                        <img src={worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`} alt="Avatar" className="w-avatar" />
                         <div>
                            <h3>{worker.userId?.name}</h3>
                            <p className="text-muted" style={{fontWeight: 600}}>{worker.category} Specialist</p>

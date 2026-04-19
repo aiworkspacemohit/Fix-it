@@ -35,7 +35,7 @@ router.get('/', protect, async (req, res) => {
     if (role === 'customer') {
       query.customerId = req.user.id;
     } else if (role === 'worker') {
-      query.workerId = req.user.id;
+      query.$or = [{ workerId: req.user.id }, { customerId: req.user.id }];
     }
 
     const bookings = await Booking.find(query)

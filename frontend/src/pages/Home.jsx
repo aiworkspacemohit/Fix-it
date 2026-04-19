@@ -42,7 +42,7 @@ const Home = () => {
             
             <div className="hero-right">
                <div className="hero-image-wrapper">
-                  <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=800" alt="Home Services Professionals" className="main-hero-img" />
+                  <img src="/images/home_hero.png" alt="Home Services Professionals" className="main-hero-img" />
                   
                   {/* Floating Elements */}
                   <div className="float-card float-1 card-light">
@@ -69,7 +69,7 @@ const Home = () => {
             <div className="carousel-wrapper">
                {['Deep Cleaning', 'Furnace Repair', 'Sofa Cleaning', 'Pipe Installation', 'Wall Painting'].map((srv, idx) => (
                   <div className="carousel-card card-light" key={idx}>
-                     <img src={`https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80`} alt={srv} />
+                     <img src="/images/home_services.png" alt={srv} />
                      <div className="caro-content">
                         <h3>{srv}</h3>
                         <p className="text-muted">From $45/hr</p>
@@ -111,7 +111,7 @@ const Home = () => {
                </ul>
             </div>
             <div className="split-right">
-               <img src="https://images.unsplash.com/photo-1544717685-618765275e7a?auto=format&fit=crop&q=80&w=600" className="rounded-img" alt="Chat UI Display" />
+               <img src="/images/chat_booking.png" className="rounded-img" alt="Chat UI Display" />
             </div>
          </div>
       </section>
@@ -124,7 +124,7 @@ const Home = () => {
                {workers.slice(0, 3).map(worker => (
                   <div className="worker-card card" key={worker._id}>
                      <div className="w-header">
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`} alt="Avatar" className="w-avatar" />
+                        <img src={worker.profileImage ? `${import.meta.env.VITE_BACKEND_URL}${worker.profileImage}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.userId?.name}`} alt="Avatar" className="w-avatar" />
                         <div>
                            <h3>{worker.userId?.name}</h3>
                            <p className="text-muted">{worker.category} Specialist</p>
