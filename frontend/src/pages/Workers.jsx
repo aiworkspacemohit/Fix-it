@@ -12,7 +12,7 @@ const Workers = () => {
   useEffect(() => {
     const fetchWorkers = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/workers');
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/workers`);
         setWorkers(data);
       } catch (err) {
         toast.error('Failed to fetch professionals');

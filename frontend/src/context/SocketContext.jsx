@@ -7,7 +7,7 @@ const SocketContext = createContext();
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const { user } = useAuth();
-  const ENDPOINT = 'http://localhost:5000';
+  const ENDPOINT = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     if (user) {

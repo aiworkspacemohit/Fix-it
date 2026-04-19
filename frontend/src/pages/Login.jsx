@@ -13,7 +13,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/login', form);
+      const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, form);
       login(data);
       toast.success('Successfully logged in!');
       navigate('/dashboard');

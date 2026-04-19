@@ -20,7 +20,7 @@ const WorkerSetupBanner = ({ onComplete }) => {
     if (!form.hourlyRate) { toast.error('Please enter your hourly rate'); return; }
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/workers/setup', form, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/workers/setup`, form, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       toast.success('Profile created! You now appear in search results.');
@@ -96,7 +96,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user?.role === 'worker') {
-      axios.get(`http://localhost:5000/api/workers/${user.id}`)
+      axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/workers/${user.id}`)
         .then(() => setHasProfile(true))
         .catch(() => setHasProfile(false))
         .finally(() => setProfileChecked(true));
@@ -107,7 +107,7 @@ const Dashboard = () => {
 
   const fetchBookings = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/bookings', { headers: authHeader });
+      const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/bookings`, { headers: authHeader });
       setBookings(data);
     } catch (err) {
       toast.error('Failed to load bookings');
@@ -120,7 +120,7 @@ const Dashboard = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${id}/status`, { status }, { headers: authHeader });
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/bookings/${id}/status`, { status }, { headers: authHeader });
       toast.success(`Booking ${status}`);
       fetchBookings();
     } catch (err) {
@@ -131,7 +131,7 @@ const Dashboard = () => {
   const handleRate = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/reviews', {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/reviews`, {
         bookingId: showRateModal._id,
         workerId: showRateModal.workerId?._id,
         rating,

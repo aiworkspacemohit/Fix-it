@@ -28,7 +28,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/register', form);
+      const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, form);
       login(data);
       toast.success('Registration successful!');
       navigate('/');

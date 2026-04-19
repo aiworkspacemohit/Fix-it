@@ -14,7 +14,7 @@ const Chat = ({ bookingId, receiverId }) => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/chat/${bookingId}`, {
+        const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/${bookingId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         setMessages(data);
@@ -52,7 +52,7 @@ const Chat = ({ bookingId, receiverId }) => {
     };
 
     try {
-      await axios.post('http://localhost:5000/api/chat', messageData, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, messageData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       socket.emit('send_message', messageData);

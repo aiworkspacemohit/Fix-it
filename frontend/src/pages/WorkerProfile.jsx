@@ -17,9 +17,9 @@ const WorkerProfile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/workers/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/workers/${id}`);
         setWorker(res.data);
-        const revRes = await axios.get(`http://localhost:5000/api/reviews/${id}`);
+        const revRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/reviews/${id}`);
         setReviews(res.data.length ? [] : revRes.data); // Null-safe check
         setReviews(revRes.data);
       } catch (err) {
@@ -37,7 +37,7 @@ const WorkerProfile = () => {
       return;
     }
     try {
-      await axios.post('http://localhost:5000/api/bookings', {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/bookings`, {
         workerId: id,
         ...bookingData
       }, {
