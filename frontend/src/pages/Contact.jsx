@@ -12,7 +12,7 @@ const Contact = () => {
   const [feedbackState, setFeedbackState] = useState('idle');
 
   // ---- Formspree: replace YOUR_FORM_ID with your actual Formspree endpoint ID ----
-  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+  const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT;
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();

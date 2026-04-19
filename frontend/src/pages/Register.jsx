@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { User, Mail, Lock, MapPin, Phone, Briefcase, Award, DollarSign, Image as ImageIcon, UserPlus } from 'lucide-react';
+import { User, Mail, Lock, MapPin, Phone, Briefcase, Award, DollarSign, UserPlus } from 'lucide-react';
 
 const CATEGORIES = [
   'Plumbing', 'Electrical', 'AC Repair', 'Carpentry',
@@ -15,7 +15,7 @@ const Register = () => {
   const [role, setRole] = useState('customer');
   const [form, setForm] = useState({ 
     name: '', email: '', password: '', role: 'customer', city: 'New York',
-    phone: '', category: 'Plumbing', experience: '1', hourlyRate: '30', bio: '', profileImage: null
+    phone: '', category: 'Plumbing', experience: '1', hourlyRate: '30', bio: ''
   });
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -30,9 +30,7 @@ const Register = () => {
     try {
       const formData = new FormData();
       Object.keys(form).forEach(key => {
-        if (form[key] !== null) {
-          formData.append(key, form[key]);
-        }
+        formData.append(key, form[key]);
       });
 
       const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, formData, {
@@ -154,19 +152,7 @@ const Register = () => {
                   ></textarea>
                 </div>
                 
-                <div className="form-group-ui full-span">
-                   <label htmlFor="profileImageUpload" className="avatar-upload-placeholder" style={{cursor: 'pointer', display: 'flex'}}>
-                      <ImageIcon size={24} />
-                      <span>{form.profileImage ? form.profileImage.name : 'Upload Profile Photo / ID (Required for Professionals)'}</span>
-                   </label>
-                   <input 
-                      type="file" 
-                      id="profileImageUpload" 
-                      style={{display: 'none'}} 
-                      accept="image/*"
-                      onChange={e => setForm({...form, profileImage: e.target.files[0]})} 
-                   />
-                </div>
+
               </>
             )}
           </div>
@@ -234,12 +220,7 @@ const Register = () => {
         
         .text-area-ui { min-height: 120px; resize: none; }
         
-        .avatar-upload-placeholder {
-           cursor: pointer; border: 2px dashed var(--border-light); padding: 32px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--text-secondary); font-weight: 600; transition: all 0.2s; background: var(--input-bg);
-        }
-        .avatar-upload-placeholder:hover {
-           border-color: var(--primary-accent); color: var(--primary-accent); background: rgba(255,122,0,0.02);
-        }
+
         
         .terms-row-ui { display: flex; align-items: center; gap: 12px; margin: 32px 0; font-size: 0.9rem; color: var(--text-secondary); }
         .terms-row-ui a { color: var(--primary-accent); font-weight: 600; text-decoration: none; }
