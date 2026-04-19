@@ -12,7 +12,7 @@ const Navbar = () => {
 
   return (
     <nav className="food-navbar">
-      <div className="container nav-content">
+      <div className="nav-content">
         
         {/* Left: Logo */}
         <Link to="/" className="nav-logo" onClick={() => setMobileMenu(false)}>
@@ -81,18 +81,27 @@ const Navbar = () => {
 
       <style jsx>{`
         .food-navbar {
-           background: var(--card-bg);
-           box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-           position: sticky;
-           top: 0;
+           background: rgba(255, 255, 255, 0.85);
+           backdrop-filter: blur(16px);
+           -webkit-backdrop-filter: blur(16px);
+           box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+           position: fixed;
+           top: 24px;
+           left: 50%;
+           transform: translateX(-50%);
+           width: calc(100% - 48px);
+           max-width: 1000px;
            z-index: 1000;
-           width: 100%;
+           border-radius: 999px;
+           border: 1px solid var(--border-light);
+           transition: all 0.3s ease;
         }
         .nav-content {
            display: flex;
            justify-content: space-between;
            align-items: center;
-           height: 80px;
+           height: 72px;
+           padding: 0 24px;
         }
         
         .nav-logo {
@@ -102,31 +111,39 @@ const Navbar = () => {
            text-decoration: none;
         }
         .logo-icon-box {
-           width: 44px; height: 44px; background: rgba(255, 122, 0, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;
+           width: 40px; height: 40px; background: rgba(255, 122, 0, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;
         }
-        .logo-text { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+        .logo-text { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
 
         .nav-center-links { display: flex; gap: 32px; align-items: center; }
-        .nav-link { text-decoration: none; color: var(--text-secondary); font-weight: 500; font-size: 1rem; transition: color 0.2s; position: relative; }
-        .nav-link:hover, .nav-link.active-link { color: var(--primary-accent); }
-        .nav-link.active-link::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 100%; height: 2px; background: var(--primary-accent); border-radius: 2px; }
+        .nav-link { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.95rem; transition: color 0.2s; position: relative; }
+        .nav-link:hover, .nav-link.active-link { color: var(--text-primary); }
+        .nav-link.active-link::after { content: ''; position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; background: var(--primary-accent); border-radius: 3px 3px 0 0; }
 
-        .nav-right-actions { display: flex; gap: 20px; align-items: center; }
-        .icon-action-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; transition: background 0.2s; }
-        .icon-action-btn:hover { background: rgba(0,0,0,0.05); color: var(--primary-accent); }
+        .nav-right-actions { display: flex; gap: 16px; align-items: center; }
+        .icon-action-btn { background: var(--input-bg); border: 1px solid var(--border-light); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; transition: all 0.2s; }
+        .icon-action-btn:hover { background: var(--primary-accent); color: white; border-color: var(--primary-accent); }
         
-        .guest-actions, .user-dashboard-actions { display: flex; align-items: center; gap: 20px; }
+        .guest-actions, .user-dashboard-actions { display: flex; align-items: center; gap: 12px; }
 
-        .mobile-toggle-btn { display: none; background: none; border: none; color: var(--text-primary); cursor: pointer; }
+        .mobile-toggle-btn { display: none; background: var(--input-bg); border: 1px solid var(--border-light); color: var(--text-primary); cursor: pointer; border-radius: 50%; width: 44px; height: 44px; align-items: center; justify-content: center; transition: all 0.2s; }
+        .mobile-toggle-btn:hover { background: var(--primary-accent); color: white; border-color: var(--primary-accent); }
 
-        .mobile-dropdown { position: absolute; top: 80px; left: 0; width: 100%; background: var(--card-bg); padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 16px; border-top: 1px solid var(--border-light); }
-        .mobile-link { text-decoration: none; color: var(--text-primary); font-size: 1.1rem; font-weight: 600; padding: 10px 16px; border-radius: 8px; }
-        .mobile-link:hover { background: rgba(255, 122, 0, 0.05); color: var(--primary-accent); }
+        .mobile-dropdown { position: absolute; top: 85px; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; border-radius: 32px; border: 1px solid var(--border-light); overflow: hidden; }
+        .mobile-link { text-decoration: none; color: var(--text-primary); font-size: 1.1rem; font-weight: 600; padding: 12px 20px; border-radius: 16px; transition: all 0.2s; }
+        .mobile-link:hover { background: rgba(255, 122, 0, 0.1); color: var(--primary-accent); padding-left: 24px; }
         .mobile-auth-divider { height: 1px; background: var(--border-light); margin: 8px 0; }
 
         @media (max-width: 1024px) {
            .nav-center-links, .nav-right-actions { display: none; }
-           .mobile-toggle-btn { display: block; }
+           .mobile-toggle-btn { display: flex; }
+        }
+        
+        @media (max-width: 768px) {
+           .food-navbar {
+              top: 16px;
+              width: calc(100% - 32px);
+           }
         }
       `}</style>
     </nav>
