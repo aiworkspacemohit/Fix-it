@@ -1,6 +1,7 @@
 import React from 'react';
 import { Shield, Users, Clock, Award, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import electricianImg from '../assets/electrician.jpg';
 
 const About = () => {
   return (
@@ -21,7 +22,7 @@ const About = () => {
       <div className="bg-white" style={{padding: '80px 0'}}>
          <div className="container split-layout">
             <div className="split-left">
-               <img src="/images/about_mission.png" alt="Professional Worker" className="rounded-img shadow-img" />
+               <img src={electricianImg} alt="Professional Worker" className="rounded-img shadow-img" />
             </div>
             <div className="split-right">
                <h2 style={{fontSize: '2.2rem', marginBottom: '24px', color: 'var(--text-primary)'}}>Our Mission</h2>
