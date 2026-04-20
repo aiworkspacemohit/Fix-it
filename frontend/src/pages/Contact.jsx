@@ -99,14 +99,14 @@ const Contact = () => {
                  <div className="input-group">
                    <label>Full Name</label>
                    <input 
-                     type="text" required className="input-field" placeholder="John Doe"
+                     type="text" required className="input-field" placeholder="Enter your name"
                      value={contactForm.name} onChange={e => setContactForm({...contactForm, name: e.target.value})}
                    />
                  </div>
                  <div className="input-group">
                    <label>Email Address</label>
                    <input 
-                     type="email" required className="input-field" placeholder="john@example.com"
+                     type="email" required className="input-field" placeholder="Enter your email"
                      value={contactForm.email} onChange={e => setContactForm({...contactForm, email: e.target.value})}
                    />
                  </div>
